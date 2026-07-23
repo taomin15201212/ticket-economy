@@ -1,0 +1,51 @@
+# 生产环境（请按实际改 host / 镜像仓库）
+replicaCount: 3
+
+image:
+  repository: registry.example.com/ticket-economy/api-server
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.ticket-economy.example.com
+  tls: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+env:
+  DB_MODE: mysql-sql
+  MYSQL_HOST: ticket-mysql.internal
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: ticket_economy
+  REDIS_ENABLED: "true"
+  REDIS_HOST: ticket-redis.internal
+  QUEUE_MODE: rabbitmq
+  RABBITMQ_URL: "amqp://te:changeme@rabbitmq:5672"
+  REVIEW_MODE: async
+  AI_PROVIDER: http
+  WECHAT_MODE: real
+  MINIO_ENABLED: "true"
+  MINIO_ENDPOINT: minio.internal
+  MINIO_PORT: "9000"
+  MINIO_BUCKET: ticket-economy
+  MINIO_USE_SSL: "true"
+  CORS_ORIGINS: "https://admin.ticket-economy.example.com"
+  TRUST_PROXY: "true"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+
+existingSecret: api-server-secret

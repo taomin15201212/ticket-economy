@@ -1,0 +1,58 @@
+# PrometheusRule for Prometheus Operator (Sprint 10)
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ticket-economy-api
+  namespace: ticket-economy
+  labels:
+    app: ticket-economy
+spec:
+  groups:
+    - name: ticket-economy.api
+      rules:
+        - alert: TicketEconomyHighErrorRate
+          expr: |
+            sum(rate(te_http_requests_total{status=~"5.."}[5m]))
+              /
+            clamp_min(sum(rate(te_http_requests_total[5m])), 0.001)
+              > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "API 5xx 比例过高"
+            description: "5 分钟 5xx 率 > 5%"
+
+        - alert: TicketEconomyHighLatencyP95
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum(rate(te_http_request_duration_seconds_bucket[5m])) by (le)
+            ) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "API p95 延迟过高"
+            description: "p95 > 1s 持续 10 分钟"
+
+        - alert: TicketEconomyLowApprovalRatio
+          expr: |
+            sum(rate(te_tickets_approved_total[15m]))
+              /
+            clamp_min(sum(rate(te_tickets_submitted_total[15m])), 0.001)
+              < 0.2
+          for: 30m
+          labels:
+            severity: info
+          annotations:
+            summary: "票据自动通过率偏低"
+            description: "15m 通过/提交 < 20%（可能 AI 策略过严或异常）"
+
+        - alert: TicketEconomyTargetDown
+          expr: up{job="ticket-economy"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "ticket-economy scrape 目标 down"

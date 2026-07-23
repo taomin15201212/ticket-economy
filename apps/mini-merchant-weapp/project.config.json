@@ -1,0 +1,8 @@
+{
+  "miniprogramRoot": "dist/",
+  "projectname": "ticket-economy-merchant",
+  "description": "文旅消费券商户端",
+  "appid": "touristappid",
+  "setting": { "urlCheck": false, "es6": true, "minified": true },
+  "compileType": "miniprogram"
+}

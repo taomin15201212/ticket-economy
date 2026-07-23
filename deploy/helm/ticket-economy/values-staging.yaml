@@ -1,0 +1,33 @@
+# 预发环境
+replicaCount: 2
+
+image:
+  tag: staging
+
+ingress:
+  enabled: true
+  host: api-staging.ticket-economy.example.com
+  tls: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+
+env:
+  DB_MODE: mysql-sql
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: ticket_economy
+  REDIS_ENABLED: "true"
+  REDIS_HOST: redis
+  QUEUE_MODE: memory
+  REVIEW_MODE: async
+  AI_PROVIDER: mock
+  WECHAT_MODE: mock
+  MINIO_ENABLED: "true"
+  MINIO_ENDPOINT: minio
+  CORS_ORIGINS: "https://admin-staging.example.com"
+  TRUST_PROXY: "true"
+
+serviceMonitor:
+  enabled: true
+  interval: 30s

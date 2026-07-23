@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>南昌票根经济数字化平台 · 高保真原型</title>
+  <style>
+    :root {
+      --bg:      #f7f2e7;
+      --surface: #fffdf7;
+      --fg:      #1a1613;
+      --muted:   #6b5f52;
+      --border:  #e6dccb;
+      --accent:  #b32b1e;
+      --accent-deep: #7a1a10;
+      --gold:    #b8892d;
+      --gold-deep: #6b4e15;
+      --device:      #12100e;   /* 设备外壳 / 后台顶栏 / 扫码器 */
+      --device-alt:  #0f0d0b;   /* 手机外框 · 更深 */
+      --device-fg:   #f4ead6;   /* 深色面板文字 */
+      --device-muted: #c9bda1;   /* 深色面板次级文字 */
+      --device-accent: #cf8a4b;  /* 深面板暖色装饰 */
+      --thumb-warm-1:#cf8a4b;
+      --thumb-warm-2:#6b3924;
+      --thumb-warm-3:#7a4a2a;
+      --thumb-warm-4:#2a1810;
+      --status-ok:   #2f7a48;
+      --status-ok-soft: color-mix(in oklch, var(--status-ok) 12%, transparent);
+      --accent-soft: color-mix(in oklch, var(--accent) 12%, transparent);
+      --gold-soft:   color-mix(in oklch, var(--gold) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+      --font-display: 'Iowan Old Style', 'Songti SC', 'STSong', 'Source Han Serif SC', 'Noto Serif SC', Georgia, serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      --fs-h1: clamp(44px, 6vw, 76px);
+      --fs-h2: clamp(28px, 3.4vw, 44px);
+      --fs-h3: 20px;
+      --fs-lead: 18px;
+      --fs-body: 15px;
+      --fs-meta: 12px;
+      --gap-xs: 8px;  --gap-sm: 12px; --gap-md: 20px;
+      --gap-lg: 32px; --gap-xl: 56px; --gap-2xl: 96px;
+      --container: 1200px; --gutter: 32px;
+      --radius: 10px; --radius-lg: 16px; --radius-phone: 36px;
+      --shadow-1: 0 1px 2px rgba(26,22,19,.04), 0 8px 24px rgba(26,22,19,.06);
+      --shadow-2: 0 2px 4px rgba(26,22,19,.06), 0 24px 48px rgba(26,22,19,.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: var(--font-body); font-size: var(--fs-body);
+      line-height: 1.6; text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(1200px 600px at 80% -200px, color-mix(in oklch, var(--accent) 5%, transparent), transparent 60%),
+        radial-gradient(900px 500px at -100px 100%, color-mix(in oklch, var(--gold) 6%, transparent), transparent 60%);
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+
+    .container { max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
+    .section { padding-block: clamp(56px, 7vw, 96px); }
+    .section + .section { border-top: 1px solid var(--border); }
+    .stack { display: flex; flex-direction: column; }
+    .stack > * + * { margin-top: var(--gap-md); }
+    .row { display: flex; align-items: center; gap: var(--gap-md); }
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-md); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-lg); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-lg); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); }
+    .grid-2-1 { display: grid; grid-template-columns: 260px 1fr; gap: var(--gap-lg); align-items: start; }
+    @media (max-width: 1080px) {
+      .grid-2, .grid-3, .grid-4, .grid-2-1 { grid-template-columns: 1fr; }
+    }
+
+    .h1, h1 { font-family: var(--font-display); font-size: var(--fs-h1); line-height: 1.05; letter-spacing: -0.01em; }
+    .h2, h2 { font-family: var(--font-display); font-size: var(--fs-h2); line-height: 1.12; letter-spacing: -0.005em; }
+    .h3, h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.3; }
+    .lead   { font-size: var(--fs-lead); line-height: 1.6; color: var(--muted); max-width: 62ch; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); margin: 0 0 var(--gap-md);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .eyebrow::before {
+      content: ""; display: inline-block; width: 22px; height: 1px;
+      background: var(--accent);
+    }
+    .meta { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--muted); letter-spacing: 0.04em; }
+    .num  { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    .topnav {
+      position: sticky; top: 0; z-index: 20;
+      background: color-mix(in oklch, var(--bg) 88%, transparent);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topnav-inner { display: flex; align-items: center; justify-content: space-between; padding-block: 16px; }
+    .topnav .logo {
+      font-family: var(--font-display); font-size: 20px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .topnav .logo-mark {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--accent); color: var(--surface);
+      display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 16px;
+    }
+    .topnav nav { display: flex; gap: var(--gap-lg); }
+    .topnav nav a { font-size: 13.5px; color: var(--muted); }
+    .topnav nav a:hover { color: var(--fg); }
+    .pagefoot { padding-block: var(--gap-xl); color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+    .pagefoot .row-between { flex-wrap: wrap; gap: var(--gap-md); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 18px; border-radius: var(--radius);
+      border: 1px solid transparent; font-size: 14px; font-weight: 500;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary  { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+    .btn-primary:hover { background: color-mix(in oklch, var(--accent) 90%, black); }
+    .btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
+    .btn-secondary:hover { border-color: var(--fg); }
+    .btn-ghost { background: transparent; color: var(--fg); border-color: transparent; padding-inline: 6px; font-size: 13px; }
+    .btn-ghost:hover { color: var(--accent); }
+    .btn-arrow::after { content: '→'; transition: transform .15s ease; }
+    .btn-arrow:hover::after { transform: translateX(2px); }
+
+    /* Focus visibility for accessibility */
+    :root {
+      --focus-ring: 0 0 0 3px color-mix(in oklch, var(--accent) 40%, transparent);
+    }
+    *:focus-visible {
+      outline: 3px solid color-mix(in oklch, var(--accent) 40%, transparent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px;
+      box-shadow: var(--shadow-1);
+    }
+    .card-flat { background: transparent; border: 0; padding: 0; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; background: var(--accent-soft);
+      color: var(--accent); border-radius: 999px;
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+    .pill-gold { background: var(--gold-soft); color: var(--gold); }
+    .pill-neutral { background: var(--fg-soft); color: var(--fg); }
+    .tag {
+      display: inline-flex; align-items: center; padding: 3px 9px;
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 999px; font-size: 12px;
+    }
+
+    .ph-img {
+      background:
+        linear-gradient(135deg, var(--accent-soft), var(--gold-soft)),
+        var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      aspect-ratio: 16 / 10;
+      display: grid; place-items: center;
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.04em;
+    }
+    .rule { border: 0; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ─── hero ─────────────────────────────────────────────── */
+    .hero { padding-block: clamp(72px, 10vw, 128px); position: relative; }
+    .hero-inner { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--gap-2xl); align-items: center; }
+    @media (max-width: 1080px) { .hero-inner { grid-template-columns: 1fr; } }
+    .hero h1 { margin: 8px 0 20px; }
+    .hero .lead { margin-bottom: 28px; }
+    .hero-cta { display: inline-flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px; }
+    .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-md); border-top: 1px solid var(--border); padding-top: 24px; }
+    .hero-stat .n { font-family: var(--font-display); font-size: 32px; letter-spacing: -0.01em; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .hero-stat .l { font-size: 12px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.06em; }
+
+    .progress-dial {
+      width: 100%; aspect-ratio: 1 / 1;
+      max-width: 380px; margin-inline: auto;
+      position: relative;
+    }
+    .progress-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .progress-dial .track { fill: none; stroke: var(--border); stroke-width: 3; }
+    .progress-dial .fill  { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round;
+      stroke-dasharray: 283; stroke-dashoffset: 175; /* ≈38 天已过 */ }
+    .progress-dial .label {
+      position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    }
+    .progress-dial .label .day { font-family: var(--font-display); font-size: 68px; line-height: 0.9; color: var(--fg); }
+    .progress-dial .label .of  { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.14em; margin-top: 10px; }
+    .progress-dial .label .tag { margin-top: 14px; }
+    .progress-dial .tick {
+      position: absolute; width: 8px; height: 8px; background: var(--accent);
+      border-radius: 50%; box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 22%, transparent);
+      top: 6%; left: 50%; transform: translateX(-50%);
+    }
+
+    /* ─── phone frame ──────────────────────────────────────── */
+    .phone {
+      width: 100%; max-width: 300px; margin-inline: auto;
+      background: var(--device-alt); border-radius: var(--radius-phone);
+      padding: 12px; box-shadow: var(--shadow-2);
+      position: relative;
+    }
+    .phone-screen {
+      background: var(--surface); border-radius: 26px;
+      overflow: hidden; position: relative;
+      aspect-ratio: 375 / 760;
+      display: flex; flex-direction: column;
+    }
+    .phone-status {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px 6px; font-family: var(--font-mono);
+      font-size: 11px; color: var(--fg);
+    }
+    .phone-status .notch {
+      position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+      width: 92px; height: 22px; background: var(--device-alt); border-radius: 0 0 14px 14px;
+    }
+    .phone-status .signals { display: inline-flex; gap: 6px; }
+    .phone-status .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--fg); }
+    .phone-body { flex: 1; padding: 6px 14px 14px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+    .phone-title { font-family: var(--font-display); font-size: 18px; letter-spacing: -0.005em; }
+    .phone-sub   { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+    .phone-cta {
+      background: var(--accent); color: var(--surface);
+      padding: 10px 12px; border-radius: 12px;
+      font-size: 12px; text-align: center; font-weight: 500;
+    }
+    .phone-tab {
+      display: flex; gap: 4px; background: var(--fg-soft);
+      padding: 3px; border-radius: 999px; font-size: 11px;
+    }
+    .phone-tab .t {
+      flex: 1; text-align: center; padding: 5px 6px; border-radius: 999px; color: var(--muted);
+    }
+    .phone-tab .t.on { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+
+    .phone-caption {
+      text-align: center; margin-top: 12px;
+    }
+    .phone-caption .k { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; }
+    .phone-caption .t { font-family: var(--font-display); font-size: 17px; margin-top: 4px; }
+    .phone-caption .d { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.45; max-width: 30ch; margin-inline: auto; }
+
+    /* ─── in-phone components ─────────────────────────────── */
+    .coupon {
+      display: grid; grid-template-columns: 46px 1fr auto; gap: 8px;
+      align-items: center; padding: 8px 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; position: relative;
+    }
+    .coupon .amt {
+      background: var(--accent); color: var(--surface);
+      width: 46px; height: 46px; border-radius: 8px;
+      display: grid; place-items: center; text-align: center;
+      font-family: var(--font-display); line-height: 1;
+    }
+    .coupon .amt .big { font-size: 20px; }
+    .coupon .amt .sm  { font-size: 9px; letter-spacing: 0.08em; margin-top: 2px; font-family: var(--font-mono); }
+    .coupon .info .n  { font-size: 12px; font-weight: 600; }
+    .coupon .info .m  { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); letter-spacing: 0.04em; }
+    .coupon .go  {
+      font-size: 11px; color: var(--accent);
+      border: 1px solid var(--accent); padding: 3px 8px; border-radius: 999px;
+    }
+    .coupon .go.gone { color: var(--muted); border-color: var(--border); background: var(--fg-soft); }
+
+    .tile-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .tile {
+      background: var(--fg-soft); border-radius: 10px;
+      padding: 8px 8px 10px;
+    }
+    .tile .n { font-family: var(--font-display); font-size: 20px; color: var(--accent); }
+    .tile .l { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.02em; }
+
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+      display: inline-block; margin-right: 6px;
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 22%, transparent);
+    }
+
+    .list-row {
+      display: grid; grid-template-columns: 22px 1fr auto; gap: 8px;
+      align-items: center; padding: 8px 0; border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .list-row:first-child { border-top: 0; }
+    .list-row .idx { font-family: var(--font-mono); color: var(--muted); }
+    .list-row .idx.gold { color: var(--gold); }
+    .list-row .nm { font-weight: 500; }
+    .list-row .pt { font-family: var(--font-mono); color: var(--accent); }
+
+    .blindbox {
+      background: linear-gradient(160deg, var(--accent) 0%, var(--accent-deep) 100%);
+      color: var(--surface); border-radius: 14px;
+      padding: 20px 16px; text-align: center; position: relative; overflow: hidden;
+      transition: transform 150ms ease;
+    }
+    .blindbox:hover { transform: translateY(-2px); }
+    .blindbox::after {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.16), transparent 40%),
+                  radial-gradient(circle at 80% 90%, rgba(255,255,255,.10), transparent 45%);
+      pointer-events: none;
+    }
+    .blindbox .cn {
+      font-family: var(--font-display); font-size: 30px; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24);
+      margin-bottom: 12px; position: relative; z-index: 1;
+    }
+    .blindbox .l1 { font-family: var(--font-display); font-size: 17px; position: relative; z-index: 1; }
+    .blindbox .l2 { font-family: var(--font-mono); font-size: 11px; opacity: .8; margin-top: 4px; position: relative; z-index: 1; letter-spacing: 0.08em; }
+    .blindbox .l3 {
+      display: inline-block; margin-top: 14px; font-size: 11px;
+      background: var(--surface); color: var(--accent);
+      padding: 6px 14px; border-radius: 999px; font-weight: 600;
+      position: relative; z-index: 1;
+    }
+
+    .checkin-map {
+      background: var(--fg-soft); border-radius: 12px;
+      height: 130px; position: relative; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .checkin-map .fence {
+      position: absolute; width: 60%; height: 60%;
+      left: 20%; top: 20%;
+      border: 1.5px dashed var(--accent);
+      border-radius: 40% 55% 45% 50%;
+      background: color-mix(in oklch, var(--accent) 8%, transparent);
+    }
+    .checkin-map .me {
+      position: absolute; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent); border: 3px solid var(--surface);
+      box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 25%, transparent);
+      top: 42%; left: 48%;
+    }
+    .checkin-map .lbl {
+      position: absolute; top: 10px; left: 12px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--fg);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 999px;
+    }
+    .checkin-steps {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 6px;
+    }
+    .checkin-steps .s {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 4px; text-align: center;
+    }
+    .checkin-steps .s.done { border-color: var(--accent); background: var(--accent-soft); }
+    .checkin-steps .s .n { font-family: var(--font-display); font-size: 15px; color: var(--accent); }
+    .checkin-steps .s .l { font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+    .video-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .video-card .thumb {
+      aspect-ratio: 4 / 3; background: linear-gradient(135deg, var(--thumb-warm-1), var(--thumb-warm-2));
+      position: relative;
+    }
+    .video-card .thumb::after {
+      content: "▶"; position: absolute; inset: 0;
+      display: grid; place-items: center; color: var(--surface);
+      font-size: 22px; opacity: .9;
+    }
+    .video-card .body { padding: 8px 10px 10px; }
+    .video-card .body .t { font-size: 12px; font-weight: 500; }
+    .video-card .body .m { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* ─── dashboard (desktop admin) ────────────────────────── */
+    .admin {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-2);
+      overflow: hidden;
+    }
+    .admin-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px; background: var(--device); color: var(--device-fg);
+    }
+    .admin-bar .l { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-display); font-size: 15px; }
+    .admin-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--device-accent); }
+    .admin-bar .r { display: inline-flex; gap: 18px; font-family: var(--font-mono); font-size: 11px; color: var(--device-muted); letter-spacing: 0.08em; }
+    .admin-body { display: grid; grid-template-columns: 200px 1fr; }
+    .admin-side {
+      background: var(--bg); border-right: 1px solid var(--border);
+      padding: 20px 14px; font-size: 13px;
+    }
+    .admin-side .sec { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; margin: 18px 0 8px; }
+    .admin-side .sec:first-child { margin-top: 0; }
+    .admin-side .lk { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 8px; color: var(--fg); }
+    .admin-side .lk .c { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+    .admin-side .lk.on { background: var(--accent); color: var(--surface); }
+    .admin-side .lk.on .c { color: color-mix(in oklch, var(--surface) 80%, transparent); }
+    .admin-main { padding: 22px 26px 28px; }
+    .admin-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+    .admin-h .t { font-family: var(--font-display); font-size: 24px; }
+    .admin-h .m { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+    .admin-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+    @media (max-width: 1080px) { .admin-body { grid-template-columns: 1fr; } .admin-cols { grid-template-columns: 1fr; } .admin-side { border-right: 0; border-bottom: 1px solid var(--border); } }
+
+    .queue { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .queue-head, .queue-row {
+      display: grid; grid-template-columns: 84px 1fr 100px 100px 70px 70px;
+      gap: 14px; align-items: center;
+      padding: 12px 16px;
+    }
+    .queue-head { background: var(--fg-soft); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+    .queue-row { border-top: 1px solid var(--border); font-size: 13px; }
+    .queue-row .thumb {
+      width: 60px; height: 40px; border-radius: 6px;
+      background: linear-gradient(140deg, var(--accent-soft), var(--gold-soft));
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-family: var(--font-mono); font-size: 9px; color: var(--muted);
+    }
+    .queue-row .kind { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    .queue-row .id   { font-family: var(--font-mono); }
+    .queue-row .conf { display: inline-flex; align-items: center; gap: 6px; }
+    .queue-row .bar { flex: 1; height: 5px; background: var(--fg-soft); border-radius: 3px; overflow: hidden; }
+    .queue-row .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+    .queue-row .conf .p { font-family: var(--font-mono); font-size: 11px; width: 32px; text-align: right; }
+    .queue-row .state {
+      font-size: 11px; padding: 3px 8px; border-radius: 999px;
+      font-family: var(--font-mono); letter-spacing: 0.04em;
+    }
+    .queue-row .state.ok    { background: var(--status-ok-soft); color: var(--status-ok); }
+    .queue-row .state.review{ background: var(--gold-soft); color: var(--gold); }
+    .queue-row .state.deny  { background: var(--accent-soft); color: var(--accent); }
+    .queue-row .act { font-size: 11px; color: var(--accent); font-family: var(--font-mono); letter-spacing: 0.06em; }
+
+    .rules { border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .rules .h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .rules .h .t { font-family: var(--font-display); font-size: 17px; }
+    .rules .row-r { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border); font-size: 13px; }
+    .rules .row-r:first-of-type { border-top: 0; }
+    .rules .row-r .l { color: var(--muted); font-size: 12px; }
+    .rules .row-r .v { font-family: var(--font-mono); font-size: 12.5px; }
+    .rules .row-r .v.on  { color: var(--accent); }
+    .slider {
+      position: relative; height: 4px; background: var(--fg-soft); border-radius: 3px; margin-top: 6px;
+    }
+    .slider .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+    .slider .knob {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--accent);
+    }
+
+    /* ─── dashboard 2: metrics ────────────────────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media (max-width: 1080px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .kpi {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .kpi .l { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .kpi .n { font-family: var(--font-display); font-size: 36px; margin-top: 6px; color: var(--fg); font-variant-numeric: tabular-nums; }
+    .kpi .n .u { font-family: var(--font-mono); font-size: 14px; color: var(--muted); margin-left: 4px; letter-spacing: 0.04em; }
+    .kpi .d { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-top: 4px; letter-spacing: 0.04em; }
+
+    .pool { border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .pool h4 { font-family: var(--font-display); font-size: 18px; margin-bottom: 12px; }
+    .pool-row { display: grid; grid-template-columns: 130px 1fr 90px 70px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); font-size: 12px; }
+    .pool-row:first-of-type { border-top: 0; }
+    .pool-row .bar { height: 6px; background: var(--fg-soft); border-radius: 4px; overflow: hidden; }
+    .pool-row .bar > i { display: block; height: 100%; background: var(--accent); }
+    .pool-row .val { font-family: var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+    .pool-row .p   { font-family: var(--font-mono); font-size: 11px; text-align: right; color: var(--muted); }
+
+    .prov-list { display: flex; flex-direction: column; }
+    .prov {
+      display: grid; grid-template-columns: 22px 1fr auto; gap: 12px;
+      align-items: center; padding: 14px 0; border-top: 1px solid var(--border);
+    }
+    .prov:first-of-type { border-top: 0; }
+    .prov .st {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--status-ok);
+      box-shadow: 0 0 0 4px color-mix(in oklch, var(--status-ok) 20%, transparent);
+    }
+    .prov .st.warn { background: var(--gold); box-shadow: 0 0 0 4px var(--gold-soft); }
+    .prov .body .n { font-family: var(--font-display); font-size: 16px; }
+    .prov .body .d { font-size: 12.5px; color: var(--muted); margin-top: 3px; max-width: 60ch; }
+    .prov .quota   { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; letter-spacing: 0.04em; }
+
+    /* ─── architecture SVG ────────────────────────────────── */
+    .arch { display: flex; justify-content: center; }
+    .arch svg { max-width: 100%; width: 100%; height: auto; }
+
+    /* ─── risk log ────────────────────────────────────────── */
+    .log { border-top: 1px solid var(--fg); }
+    .log-row { display: grid; grid-template-columns: 110px 1fr 160px; gap: var(--gap-lg); padding: 24px 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+    .log-row .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; }
+    .log-row h3 { font-family: var(--font-display); font-size: 22px; }
+    .log-row p { color: var(--muted); font-size: 14px; margin-top: 6px; max-width: 60ch; }
+    .log-row .r { text-align: right; }
+    .log-row .r .st { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+
+    /* ─── merchant frames variant ─────────────────────────── */
+    .scanner {
+      background: var(--device); border-radius: 14px; padding: 14px;
+      position: relative; aspect-ratio: 1 / 1;
+      display: grid; place-items: center;
+      color: var(--device-fg);
+    }
+    .scanner .frame {
+      width: 78%; aspect-ratio: 1; border: 2px solid var(--device-fg);
+      border-radius: 10px; position: relative; opacity: .9;
+    }
+    .scanner .frame::before {
+      content: ""; position: absolute; left: 0; right: 0; height: 2px;
+      background: var(--accent); top: 45%;
+      box-shadow: 0 0 12px var(--accent);
+    }
+    .scanner .frame::after {
+      content: "扫码核销 · Merchant Verify"; position: absolute; bottom: -26px; left: 0; right: 0;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--device-muted); text-align: center;
+    }
+
+    .success {
+      background: color-mix(in oklch, var(--status-ok) 8%, var(--surface));
+      border-radius: 12px; padding: 14px; border: 1px solid color-mix(in oklch, var(--status-ok) 25%, transparent);
+    }
+    .success .ch { width: 40px; height: 40px; border-radius: 50%; background: var(--status-ok); color: var(--surface); display: grid; place-items: center; font-size: 20px; margin-bottom: 8px; }
+    .success .t { font-family: var(--font-display); font-size: 16px; }
+    .success .m { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; }
+
+    /* ─── section header helper ───────────────────────────── */
+    .sec-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: var(--gap-xl); gap: var(--gap-lg); flex-wrap: wrap; }
+    .sec-head .l { max-width: 62ch; }
+    .sec-head .r { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+
+    /* ─── arch SVG token bindings (avoids raw hex in markup) ─── */
+    .arch .sf-surface { fill: var(--surface); }
+    .arch .sf-bg      { fill: var(--bg); }
+    .arch .sf-soft    { fill: var(--fg-soft); }
+    .arch .sf-fg      { fill: var(--fg); }
+    .arch .sf-muted   { fill: var(--muted); }
+    .arch .sf-accent  { fill: var(--accent); }
+    .arch .sf-device  { fill: var(--device); }
+    .arch .sf-devicefg    { fill: var(--device-fg); }
+    .arch .sf-devicemuted { fill: var(--device-muted); }
+    .arch .sf-innerdark   { fill: rgba(255,255,255,.06); }
+    .arch .ss-border  { stroke: var(--border); }
+    .arch .ss-innerdark { stroke: rgba(255,255,255,.14); }
+    .arch .ss-accent  { stroke: var(--accent); }
+    .arch .ss-muted   { stroke: var(--muted); }
+    .arch .ss-device  { stroke: var(--device); }
+  </style>
+</head>
+<body>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <span class="logo">
+        <span class="logo-mark" aria-hidden="true">洪</span>
+        南昌票根经济数字化平台
+      </span>
+      <nav>
+        <a href="#arch" data-od-id="nav-arch">系统架构</a>
+        <a href="#consumer" data-od-id="nav-consumer">消费者端</a>
+        <a href="#merchant" data-od-id="nav-merchant">商户端</a>
+        <a href="#admin" data-od-id="nav-admin">管理后台</a>
+        <a href="#risk" data-od-id="nav-risk">风险与对接</a>
+      </nav>
+      <button class="btn btn-primary" data-od-id="nav-cta">查看投放清单</button>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <!-- ─────────────────── 1. HERO ─────────────────── -->
+    <section class="section hero" data-od-id="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="eyebrow">南昌 2025 秋冬文旅消费季 · 100 天</span>
+          <h1>一张票根，串起一座城的<br/>一百天消费链路。</h1>
+          <p class="lead">南昌首个票根经济一体化平台：智能核验、盲盒权益分发、六大玩法体系,把外地游客的一次到访,沉淀为多次消费、社交裂变与城市情感传播。</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" data-od-id="hero-cta-1">进入消费者小程序</button>
+            <button class="btn btn-secondary" data-od-id="hero-cta-2">运营方查看后台</button>
+            <button class="btn btn-ghost btn-arrow" data-od-id="hero-cta-3">阅读投放机制</button>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="n num">73,000</div>
+              <div class="l">100 天总权益投放 · 张</div>
+            </div>
+            <div class="hero-stat">
+              <div class="n num">6</div>
+              <div class="l">核心玩法体系</div>
+            </div>
+            <div class="hero-stat">
+              <div class="n num">3</div>
+              <div class="l">端（消费者·商户·管理）</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="progress-dial" aria-label="100 天活动进度">
+            <svg viewBox="0 0 100 100" role="img">
+              <circle class="track" cx="50" cy="50" r="45" />
+              <circle class="fill"  cx="50" cy="50" r="45" />
+            </svg>
+            <div class="tick" aria-hidden="true"></div>
+            <div class="label">
+              <div>
+                <div class="day num">38</div>
+                <div class="of">DAY 38 / 100 · IN PROGRESS</div>
+                <div class="tag pill">活动进度 · 38.0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────── 2. ARCHITECTURE ─────────────────── -->
+    <section class="section" id="arch" data-od-id="architecture">
+      <div class="container">
+        <div class="sec-head">
+          <div class="l">
+            <span class="eyebrow">系统架构</span>
+            <h2 class="h2">三端一体 · 智能核验为中枢</h2>
+            <p class="lead" style="margin-top: 14px;">消费者小程序上传票根,自动核验智能体做三重校验,权益进入分层玩法引擎,商户端扫码核销,数据流回管理端形成可复盘的活动闭环。</p>
+          </div>
+          <div class="r">DIAGRAM · 2025.10</div>
+        </div>
+
+        <div class="arch card">
+          <svg viewBox="0 0 1080 460" role="img" aria-label="系统架构图">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" class="sf-accent"/>
+              </marker>
+              <marker id="ahg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" class="sf-muted"/>
+              </marker>
+            </defs>
+
+            <!-- consumer -->
+            <g>
+              <rect x="30" y="60" width="240" height="340" rx="14" class="sf-surface ss-border"/>
+              <text x="50" y="90" font-family="Iowan Old Style, Songti SC, serif" font-size="18" class="sf-fg">消费者小程序</text>
+              <text x="50" y="108" font-family="ui-monospace, monospace" font-size="10" class="sf-muted" letter-spacing="1">CONSUMER · WeChat Mini</text>
+              <g font-family="-apple-system, PingFang SC, sans-serif" font-size="12" class="sf-fg">
+                <rect x="50" y="128" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="150">① 上传票根 OCR 识别</text>
+                <rect x="50" y="170" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="192">② 定向抢券 / 盲盒开奖</text>
+                <rect x="50" y="212" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="234">③ 打卡任务(地理围栏)</text>
+                <rect x="50" y="254" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="276">④ 短视频推荐官</text>
+                <rect x="50" y="296" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="318">⑤ 积分排行榜 / 卡包</text>
+                <rect x="50" y="338" width="200" height="34" rx="8" class="sf-bg ss-border"/><text x="62" y="360">⑥ 文创 DIY(线下服务点)</text>
+              </g>
+            </g>
+
+            <!-- core engine -->
+            <g>
+              <rect x="340" y="120" width="380" height="220" rx="14" fill="var(--device)" stroke="var(--device)"/>
+              <text x="360" y="150" font-family="Iowan Old Style, Songti SC, serif" font-size="20" fill="var(--device-fg)">智能核验中枢 · Core</text>
+              <text x="360" y="168" font-family="ui-monospace, monospace" font-size="10" fill="var(--device-muted)" letter-spacing="1">AI VERIFY · RULE ENGINE · REWARD ROUTER</text>
+
+              <g font-family="-apple-system, PingFang SC, sans-serif" font-size="12" fill="var(--device-fg)">
+                <rect x="360" y="188" width="160" height="46" rx="8" class="sf-innerdark ss-innerdark"/>
+                <text x="372" y="208">票根识别智能体</text>
+                <text x="372" y="224" font-size="10" fill="var(--device-muted)" font-family="ui-monospace, monospace" letter-spacing="1">OCR · EXIF · HASH</text>
+
+                <rect x="540" y="188" width="160" height="46" rx="8" class="sf-innerdark ss-innerdark"/>
+                <text x="552" y="208">规则引擎</text>
+                <text x="552" y="224" font-size="10" fill="var(--device-muted)" font-family="ui-monospace, monospace" letter-spacing="1">配额 · 时段 · 白名单</text>
+
+                <rect x="360" y="248" width="160" height="46" rx="8" class="sf-innerdark ss-innerdark"/>
+                <text x="372" y="268">权益路由</text>
+                <text x="372" y="284" font-size="10" fill="var(--device-muted)" font-family="ui-monospace, monospace" letter-spacing="1">奶茶 · 酒店 · 演出 · 景区</text>
+
+                <rect x="540" y="248" width="160" height="46" rx="8" class="sf-innerdark ss-innerdark"/>
+                <text x="552" y="268">积分与榜单</text>
+                <text x="552" y="284" font-size="10" fill="var(--device-muted)" font-family="ui-monospace, monospace" letter-spacing="1">1 票 = 1 分 · 累计</text>
+              </g>
+            </g>
+
+            <!-- middle platforms -->
+            <g>
+              <rect x="340" y="20" width="380" height="80" rx="12" class="sf-bg ss-border"/>
+              <text x="360" y="46" font-family="Iowan Old Style, Songti SC, serif" font-size="15" class="sf-fg">中间对接平台</text>
+              <g font-family="ui-monospace, monospace" font-size="10" class="sf-muted" letter-spacing="1">
+                <text x="360" y="70">A 级景区门票 · 南昌地铁</text>
+                <text x="360" y="86">滴滴出行 · 淘票票 / 猫眼</text>
+              </g>
+              <rect x="560" y="34" width="150" height="52" rx="8" class="sf-surface ss-border"/>
+              <text x="575" y="58" font-family="-apple-system, PingFang SC, sans-serif" font-size="12" class="sf-fg">白名单 · 配额同步</text>
+              <text x="575" y="76" font-family="ui-monospace, monospace" font-size="10" class="sf-muted" letter-spacing="1">Health : GREEN</text>
+            </g>
+
+            <!-- merchant -->
+            <g>
+              <rect x="790" y="60" width="260" height="160" rx="14" class="sf-surface ss-border"/>
+              <text x="810" y="90" font-family="Iowan Old Style, Songti SC, serif" font-size="18" class="sf-fg">商户端</text>
+              <text x="810" y="108" font-family="ui-monospace, monospace" font-size="10" class="sf-muted" letter-spacing="1">MERCHANT · POS Mini</text>
+              <g font-family="-apple-system, PingFang SC, sans-serif" font-size="12" class="sf-fg">
+                <rect x="810" y="128" width="220" height="34" rx="8" class="sf-bg ss-border"/><text x="822" y="150">扫码核销 / 门店注册</text>
+                <rect x="810" y="170" width="220" height="34" rx="8" class="sf-bg ss-border"/><text x="822" y="192">异常券拦截 · 对账</text>
+              </g>
+            </g>
+
+            <!-- admin -->
+            <g>
+              <rect x="790" y="240" width="260" height="160" rx="14" class="sf-surface ss-border"/>
+              <text x="810" y="270" font-family="Iowan Old Style, Songti SC, serif" font-size="18" class="sf-fg">管理后台</text>
+              <text x="810" y="288" font-family="ui-monospace, monospace" font-size="10" class="sf-muted" letter-spacing="1">ADMIN · Web Desktop</text>
+              <g font-family="-apple-system, PingFang SC, sans-serif" font-size="12" class="sf-fg">
+                <rect x="810" y="308" width="220" height="34" rx="8" class="sf-bg ss-border"/><text x="822" y="330">规则配置 · 人工复核</text>
+                <rect x="810" y="350" width="220" height="34" rx="8" class="sf-bg ss-border"/><text x="822" y="372">发券 / 核销 / 积分统计</text>
+              </g>
+            </g>
+
+            <!-- arrows -->
+            <path d="M270 220 L 340 220" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+            <path d="M720 220 L 790 140" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+            <path d="M720 260 L 790 320" stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+            <path d="M530 120 L 530 100" stroke="var(--muted)" stroke-width="1.2" fill="none" stroke-dasharray="4 3" marker-end="url(#ahg)"/>
+            <path d="M790 320 Q 760 260 720 260" stroke="var(--muted)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+    <!-- ─────────────────── 3. CONSUMER · 6 plays ─────────────────── -->
+    <section class="section" id="consumer" data-od-id="consumer">
+      <div class="container">
+        <div class="sec-head">
+          <div class="l">
+            <span class="eyebrow">消费者端 · 微信小程序</span>
+            <h2 class="h2">六大玩法,分层承接六类人群。</h2>
+            <p class="lead" style="margin-top: 14px;">突破单一转盘抽奖模式,构建体系化玩法产品,覆盖大众普惠、年轻潮流、家庭亲子、深度游客、本地市民、社交裂变——每张票根都能找到自己的价值出口。</p>
+          </div>
+          <div class="r">6 SCREENS · 375×760</div>
+        </div>
+
+        <div class="grid-3" style="row-gap: 56px;">
+
+          <!-- Play 1: 定向特权 -->
+          <div class="card-flat" data-od-id="play-1">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>9:00</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="row-between" style="margin-top: 6px;">
+                    <div class="phone-title">今日投放</div>
+                    <span class="pill"><span class="badge-dot"></span>已放号</span>
+                  </div>
+                  <div class="phone-sub">外地游客专属 · 每日 9:00 起 · 抢完即止</div>
+
+                  <div class="stack" style="gap: 6px; margin-top: 4px;">
+                    <div class="coupon">
+                      <div class="amt"><div class="big">免</div><div class="sm">FREE</div></div>
+                      <div class="info"><div class="n">免费奶茶券</div><div class="m">剩 62 / 100 · 7d 有效</div></div>
+                      <div class="go">领取</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">免</div><div class="sm">FREE</div></div>
+                      <div class="info"><div class="n">免费烤肠券</div><div class="m">剩 41 / 100 · 7d 有效</div></div>
+                      <div class="go">领取</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">8<span style="font-size:11px;">折</span></div><div class="sm">DISC</div></div>
+                      <div class="info"><div class="n">奶茶 8 折券</div><div class="m">剩 178 / 200</div></div>
+                      <div class="go">领取</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">抵</div><div class="sm">DEDUCT</div></div>
+                      <div class="info"><div class="n">亚朵酒店抵扣券</div><div class="m">剩 89 / 100</div></div>
+                      <div class="go">领取</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">夜</div><div class="sm">NIGHT</div></div>
+                      <div class="info"><div class="n">怪石岭夜游贵宾券</div><div class="m">已抢完</div></div>
+                      <div class="go gone">明日再来</div>
+                    </div>
+                  </div>
+
+                  <div class="phone-cta">上传交通票根 · 参与抢券</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 01</div>
+              <div class="t">票根定向特权</div>
+              <div class="d">交通票根(高铁 / 汽车 / 飞机 / 高速)每日 9:00 抢券,7 类权益 · 抢完即止。</div>
+            </div>
+          </div>
+
+          <!-- Play 2: 盲盒 -->
+          <div class="card-flat" data-od-id="play-2">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>9:12</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-title">票根盲盒</div>
+                  <div class="phone-sub">上传有效票根 · 100% 中奖</div>
+
+                  <div class="blindbox">
+                    <div class="cn">洪</div>
+                    <div class="l1">恭喜获得</div>
+                    <div class="l2" style="margin-top: 6px;">洪都大拇指 · 8 折券</div>
+                    <div class="l3">加入卡包</div>
+                  </div>
+
+                  <div class="phone-sub" style="margin-top: 2px;">今日已开 3 次 · 剩余 2 次</div>
+                  <div class="stack" style="gap: 6px;">
+                    <div class="coupon">
+                      <div class="amt" style="background: var(--gold);"><div class="big">30-5</div></div>
+                      <div class="info"><div class="n">煌上煌 · 满 30 减 5</div><div class="m">2 天前开出 · 7d 有效</div></div>
+                      <div class="go">卡包</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">滴</div><div class="sm">TAXI</div></div>
+                      <div class="info"><div class="n">景区滴滴 5 折券</div><div class="m">1 万张总量池</div></div>
+                      <div class="go">卡包</div>
+                    </div>
+                  </div>
+
+                  <div class="phone-cta">再开一个盲盒</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 02</div>
+              <div class="t">票根盲盒 · 100% 中奖</div>
+              <div class="d">餐饮 / 住宿 / 演出 / 交通 / 电影五池随机,3D 翻转揭示卡券。</div>
+            </div>
+          </div>
+
+          <!-- Play 3: 打卡 · 地理围栏 -->
+          <div class="card-flat" data-od-id="play-3">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>14:26</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-title">A 级景区集章</div>
+                  <div class="phone-sub">小程序内定位打卡 · 无需上传照片</div>
+
+                  <div class="checkin-map">
+                    <span class="lbl">滕王阁 · 已进入围栏 210m</span>
+                    <div class="fence"></div>
+                    <div class="me"></div>
+                  </div>
+
+                  <div class="checkin-steps">
+                    <div class="s done"><div class="n">3</div><div class="l">冰箱贴 · 拌粉</div></div>
+                    <div class="s done"><div class="n">5</div><div class="l">南昌味道券</div></div>
+                    <div class="s"><div class="n">10</div><div class="l">寻梦滕王阁</div></div>
+                    <div class="s"><div class="n">15</div><div class="l">又见王勃礼盒</div></div>
+                  </div>
+
+                  <div class="stack" style="gap: 4px; margin-top: 2px;">
+                    <div class="list-row"><span class="idx">01</span><span class="nm">滕王阁</span><span class="pt">已到访</span></div>
+                    <div class="list-row"><span class="idx">02</span><span class="nm">八一起义纪念馆</span><span class="pt">已到访</span></div>
+                    <div class="list-row"><span class="idx">03</span><span class="nm">海昏侯国遗址</span><span class="pt">已到访</span></div>
+                    <div class="list-row"><span class="idx">04</span><span class="nm">万寿宫</span><span class="pt" style="color: var(--muted);">未到访</span></div>
+                    <div class="list-row"><span class="idx">05</span><span class="nm">八大山人纪念馆</span><span class="pt" style="color: var(--muted);">未到访</span></div>
+                  </div>
+
+                  <div class="phone-cta">领取阶梯奖励</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 03</div>
+              <div class="t">打卡任务赛</div>
+              <div class="d">用地理围栏替代照片上传,天然规避 P 图。3 / 5 / 10 / 15 阶梯奖励。</div>
+            </div>
+          </div>
+
+          <!-- Play 4: 文旅推荐官 -->
+          <div class="card-flat" data-od-id="play-4">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>20:41</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-title">文旅推荐官</div>
+                  <div class="phone-sub"># 我为南昌代言 · 10 月榜单</div>
+
+                  <div class="grid-2" style="gap: 8px;">
+                    <div class="video-card">
+                      <div class="thumb"></div>
+                      <div class="body"><div class="t">滕王阁的一场落日</div><div class="m">@江右阿宁 · 1:02</div></div>
+                    </div>
+                    <div class="video-card">
+                      <div class="thumb" style="background: linear-gradient(135deg,var(--thumb-warm-3),var(--thumb-warm-4));"></div>
+                      <div class="body"><div class="t">南昌拌粉一天三顿</div><div class="m">@洪城食客 · 0:58</div></div>
+                    </div>
+                  </div>
+
+                  <div class="pool" style="padding: 12px; border-radius: 10px;">
+                    <div class="row-between" style="margin-bottom: 6px;">
+                      <span style="font-family: var(--font-display); font-size: 14px;">本月榜单 · TOP 3</span>
+                      <span class="pill pill-gold">810 元礼包</span>
+                    </div>
+                    <div class="list-row"><span class="idx gold">01</span><span class="nm">@江右阿宁</span><span class="pt">2,431 赞</span></div>
+                    <div class="list-row"><span class="idx gold">02</span><span class="nm">@洪城食客</span><span class="pt">1,908 赞</span></div>
+                    <div class="list-row"><span class="idx gold">03</span><span class="nm">@赣鄱旅记</span><span class="pt">1,776 赞</span></div>
+                  </div>
+
+                  <div class="phone-cta">上传我的 1 分钟推介</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 04</div>
+              <div class="t">短视频推荐官</div>
+              <div class="d">朋友圈 / 抖音 1 分钟推介 · 月度评比前三 · 价值 810 元大礼包。</div>
+            </div>
+          </div>
+
+          <!-- Play 5: 积分排行榜 -->
+          <div class="card-flat" data-od-id="play-5">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>10:08</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="row-between" style="margin-top: 4px;">
+                    <div class="phone-title">一票通攒</div>
+                    <span class="pill pill-gold">10.08 结榜</span>
+                  </div>
+
+                  <div style="background: linear-gradient(160deg, var(--gold) 0%, var(--gold-deep) 100%); color: color-mix(in oklch, var(--gold) 12%, white); border-radius: 14px; padding: 16px;">
+                    <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; opacity: .8;">MY POINTS · 我的积分</div>
+                    <div style="font-family: var(--font-display); font-size: 38px; line-height: 1; margin-top: 6px;">27<span style="font-size: 14px; opacity: .8; margin-left: 4px;">分</span></div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; margin-top: 6px; opacity: .8;">距离榜单第 10 名还差 6 分</div>
+                  </div>
+
+                  <div class="tile-row">
+                    <div class="tile"><div class="n num">14</div><div class="l">交通票</div></div>
+                    <div class="tile"><div class="n num">8</div><div class="l">餐饮住宿</div></div>
+                    <div class="tile"><div class="n num">5</div><div class="l">演出/景区</div></div>
+                  </div>
+
+                  <div class="pool" style="padding: 12px; border-radius: 10px;">
+                    <div class="row-between" style="margin-bottom: 6px;">
+                      <span style="font-family: var(--font-display); font-size: 14px;">当前排行榜 · TOP</span>
+                      <span class="meta">1 张票 · 1 分</span>
+                    </div>
+                    <div class="list-row"><span class="idx gold">01</span><span class="nm">王***(1868)</span><span class="pt">142 分</span></div>
+                    <div class="list-row"><span class="idx gold">02</span><span class="nm">李***(6620)</span><span class="pt">128 分</span></div>
+                    <div class="list-row"><span class="idx gold">03</span><span class="nm">陈***(3391)</span><span class="pt">119 分</span></div>
+                    <div class="list-row"><span class="idx">10</span><span class="nm">榜单末位 · 门槛</span><span class="pt">33 分</span></div>
+                    <div class="list-row"><span class="idx">…</span><span class="nm">我(4188)</span><span class="pt">27 分</span></div>
+                  </div>
+
+                  <div class="phone-cta">上传票根 · 攒积分</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 05</div>
+              <div class="t">一票通攒 · 积分排行榜</div>
+              <div class="d">1 票 = 1 分 · 10.08 结榜 · 前 10 名分获梅岭岭溪谷、亚朵、寻梦滕王阁演出票。</div>
+            </div>
+          </div>
+
+          <!-- Play 6: 文创 DIY -->
+          <div class="card-flat" data-od-id="play-6">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status">
+                  <span>15:33</span>
+                  <span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-title">废弃票根重生</div>
+                  <div class="phone-sub">滕王阁 · 赣物志荣宝生活馆 · 手绘 DIY</div>
+
+                  <div class="ph-img" style="aspect-ratio: 4 / 3; margin-block: 4px;">DIY 作品墙 · 大江新闻精选</div>
+
+                  <div class="grid-2" style="gap: 6px;">
+                    <div class="card" style="padding: 10px; border-radius: 10px;">
+                      <div style="font-family: var(--font-display); font-size: 14px;">今日在馆</div>
+                      <div class="num" style="font-family: var(--font-display); font-size: 26px; color: var(--accent); margin-top: 4px;">17<span style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-left: 3px;">位</span></div>
+                    </div>
+                    <div class="card" style="padding: 10px; border-radius: 10px;">
+                      <div style="font-family: var(--font-display); font-size: 14px;">已展出</div>
+                      <div class="num" style="font-family: var(--font-display); font-size: 26px; color: var(--accent); margin-top: 4px;">42<span style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-left: 3px;">幅</span></div>
+                    </div>
+                  </div>
+
+                  <div class="stack" style="gap: 4px;">
+                    <div class="list-row" style="font-size: 11.5px;"><span class="idx">·</span><span class="nm"># 一张票根一座城</span><span class="pt">话题 · 2.1w</span></div>
+                    <div class="list-row" style="font-size: 11.5px;"><span class="idx">·</span><span class="nm">凭 DIY 作品换茶饮礼包</span><span class="pt">现场领</span></div>
+                  </div>
+
+                  <div class="phone-cta">预约到店 · 领取画材</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">PLAY 06</div>
+              <div class="t">废弃票根重生 · 文创 DIY</div>
+              <div class="d">线下服务点手绘创作,优秀作品登大江新闻,凭原创可换茶饮大礼包一份。</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- ─────────────────── 4. MERCHANT ─────────────────── -->
+    <section class="section" id="merchant" data-od-id="merchant">
+      <div class="container">
+        <div class="sec-head">
+          <div class="l">
+            <span class="eyebrow">商户端 · 门店核销</span>
+            <h2 class="h2">扫码即核销 · 门店对账清晰。</h2>
+            <p class="lead" style="margin-top: 14px;">品牌总部批量注册门店(如"千百味·象湖店"),店员摄像头扫码即验券,过期/伪造券自动拦截,当日核销回执与结算按门店维度归档。</p>
+          </div>
+          <div class="r">3 SCREENS · 门店端小程序</div>
+        </div>
+
+        <div class="grid-3" style="row-gap: 56px;">
+
+          <!-- Merchant 1: 门店注册 -->
+          <div class="card-flat" data-od-id="merch-1">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status"><span>10:02</span><span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+                <div class="phone-body">
+                  <div class="phone-title">门店注册</div>
+                  <div class="phone-sub">品牌 · 门店 · 经办人 · 结算账户</div>
+
+                  <div class="stack" style="gap: 8px; margin-top: 4px;">
+                    <div>
+                      <div class="meta" style="margin-bottom: 4px;">品牌</div>
+                      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px;">千百味 <span class="pill pill-neutral" style="margin-left: 6px;">已认证</span></div>
+                    </div>
+                    <div>
+                      <div class="meta" style="margin-bottom: 4px;">门店 *</div>
+                      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px;">千百味 · 象湖 CBD 店</div>
+                    </div>
+                    <div>
+                      <div class="meta" style="margin-bottom: 4px;">地址</div>
+                      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; color: var(--muted);">南昌市青云谱区象湖大道 128 号</div>
+                    </div>
+                    <div>
+                      <div class="meta" style="margin-bottom: 4px;">经办人 · 手机</div>
+                      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: var(--font-mono);">王店长 · 138****0421</div>
+                    </div>
+                    <div>
+                      <div class="meta" style="margin-bottom: 4px;">可核销权益</div>
+                      <div class="row" style="gap: 4px; flex-wrap: wrap;">
+                        <span class="tag">江西小炒满 100-10</span>
+                        <span class="tag">满 100-20</span>
+                        <span class="tag">盲盒券</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="phone-cta">提交审核</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">STEP 01</div>
+              <div class="t">门店注册与认证</div>
+              <div class="d">按"品牌 → 门店"两级组织结构注册,营业执照后台审核后即可上线。</div>
+            </div>
+          </div>
+
+          <!-- Merchant 2: 扫码 -->
+          <div class="card-flat" data-od-id="merch-2">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status"><span>12:34</span><span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+                <div class="phone-body">
+                  <div class="row-between">
+                    <div class="phone-title">扫码核销</div>
+                    <span class="meta">象湖 CBD 店</span>
+                  </div>
+
+                  <div class="scanner">
+                    <div class="frame"></div>
+                  </div>
+
+                  <div class="stack" style="gap: 6px; margin-top: 22px;">
+                    <div class="phone-sub">最近一笔 · 2 分钟前</div>
+                    <div class="coupon">
+                      <div class="amt"><div class="big">100-20</div></div>
+                      <div class="info"><div class="n">观宴 · 满 100 减 20</div><div class="m">用户 ****4188 · 已核销</div></div>
+                      <div class="go">详情</div>
+                    </div>
+                    <div class="coupon">
+                      <div class="amt" style="background: var(--gold);"><div class="big">100-20</div></div>
+                      <div class="info"><div class="n">春字号 · 满 100 减 20</div><div class="m">用户 ****6620 · 已核销</div></div>
+                      <div class="go">详情</div>
+                    </div>
+                  </div>
+
+                  <div class="phone-cta">手动输入券码</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">STEP 02</div>
+              <div class="t">扫码验券 · 二次确认</div>
+              <div class="d">摄像头识别券码 → 显示面额与叠加规则 → 店员二次确认 → 核销成功。</div>
+            </div>
+          </div>
+
+          <!-- Merchant 3: 核销成功 & 对账 -->
+          <div class="card-flat" data-od-id="merch-3">
+            <div class="phone">
+              <div class="phone-screen">
+                <span class="notch"></span>
+                <div class="phone-status"><span>21:00</span><span class="signals"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>
+                <div class="phone-body">
+                  <div class="phone-title">今日对账</div>
+                  <div class="phone-sub">2025-10-15 · 象湖 CBD 店</div>
+
+                  <div class="success">
+                    <div class="ch">✓</div>
+                    <div class="t">今日核销 46 张 · ¥ 782</div>
+                    <div class="m">JIT-2025-10-15 · 待结算 ¥ 782</div>
+                  </div>
+
+                  <div class="stack" style="gap: 4px;">
+                    <div class="list-row"><span class="idx">·</span><span class="nm">江西小炒满 100-10</span><span class="pt">14 张</span></div>
+                    <div class="list-row"><span class="idx">·</span><span class="nm">满 100-20 系列</span><span class="pt">21 张</span></div>
+                    <div class="list-row"><span class="idx">·</span><span class="nm">盲盒券 · 8 折</span><span class="pt">9 张</span></div>
+                    <div class="list-row"><span class="idx">·</span><span class="nm">异常拦截(已过期)</span><span class="pt" style="color: var(--accent);">2 张</span></div>
+                  </div>
+
+                  <div class="pool" style="padding: 10px; border-radius: 10px;">
+                    <div class="row-between"><span class="meta">周核销趋势</span><span class="meta">↑ 12.4%</span></div>
+                    <svg viewBox="0 0 240 60" style="margin-top: 6px; width: 100%;" aria-hidden="true">
+                      <polyline points="0,44 34,38 68,42 102,30 136,26 170,20 204,14 240,8" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <polygon points="0,44 34,38 68,42 102,30 136,26 170,20 204,14 240,8 240,60 0,60" fill="color-mix(in oklch, var(--accent) 8%, transparent)"/>
+                    </svg>
+                  </div>
+
+                  <div class="phone-cta">导出对账单</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <div class="k">STEP 03</div>
+              <div class="t">核销回执 · 门店对账</div>
+              <div class="d">按日 / 周 / 月归档,异常券自动打标,一键导出结算清单。</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- ─────────────────── 5. ADMIN · verify center ─────────────────── -->
+    <section class="section" id="admin" data-od-id="admin-verify">
+      <div class="container">
+        <div class="sec-head">
+          <div class="l">
+            <span class="eyebrow">管理后台 · 智能核验中心</span>
+            <h2 class="h2">AI 打分 · 人工兜底 · 规则可调。</h2>
+            <p class="lead" style="margin-top: 14px;">票根识别智能体给出 OCR 结果与置信度: ≥ 0.90 自动通过,0.60–0.90 进人工复核,< 0.60 直接拦截。规则可实时调参,拦截原因写入账本可复盘。</p>
+          </div>
+          <div class="r">DESKTOP · 1440</div>
+        </div>
+
+        <div class="admin">
+          <div class="admin-bar">
+            <span class="l"><span class="dot"></span>南昌票根经济 · 后台运营中枢</span>
+            <span class="r"><span>今日 · 2025-10-15</span><span>Day 038 / 100</span><span>OPERATOR · 大江网 运营组</span></span>
+          </div>
+
+          <div class="admin-body">
+            <aside class="admin-side">
+              <div class="sec">核销运营</div>
+              <div class="lk on">智能核验 <span class="c">48</span></div>
+              <div class="lk">发券规则 <span class="c">7</span></div>
+              <div class="lk">积分规则 <span class="c">3</span></div>
+              <div class="lk">短视频评审 <span class="c">12</span></div>
+              <div class="lk">DIY 作品 <span class="c">5</span></div>
+
+              <div class="sec">统计报表</div>
+              <div class="lk">发券统计</div>
+              <div class="lk">核销统计</div>
+              <div class="lk">积分排行</div>
+              <div class="lk">地域来源</div>
+
+              <div class="sec">系统对接</div>
+              <div class="lk">中间平台 <span class="c">4</span></div>
+              <div class="lk">商户管理 <span class="c">312</span></div>
+            </aside>
+
+            <div class="admin-main">
+              <div class="admin-h">
+                <div>
+                  <div class="t">智能核验中心 · 待审队列</div>
+                  <div class="meta" style="margin-top: 6px;">今日累计 12,481 张 · AI 自动通过 11,802 · 人工复核 631 · 拦截 48</div>
+                </div>
+                <div class="m">刷新 · 每 15s</div>
+              </div>
+
+              <div class="admin-cols">
+                <div class="queue">
+                  <div class="queue-head">
+                    <span>票据</span><span>票号 / 车次</span><span>类型</span><span>AI 置信度</span><span>状态</span><span></span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">高铁票</div>
+                    <div class="id">G1685 · 12A</div>
+                    <div class="kind">HSR TRAIN</div>
+                    <div class="conf"><span class="bar"><i style="width: 97%;"></i></span><span class="p">0.97</span></div>
+                    <span class="state ok">自动过</span>
+                    <span class="act">查看 →</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">飞机票</div>
+                    <div class="id">MU5471 · 24C</div>
+                    <div class="kind">FLIGHT</div>
+                    <div class="conf"><span class="bar"><i style="width: 92%;"></i></span><span class="p">0.92</span></div>
+                    <span class="state ok">自动过</span>
+                    <span class="act">查看 →</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">高速费</div>
+                    <div class="id">HB-3288-CX</div>
+                    <div class="kind">HIGHWAY</div>
+                    <div class="conf"><span class="bar"><i style="width: 74%;"></i></span><span class="p">0.74</span></div>
+                    <span class="state review">复核中</span>
+                    <span class="act">通过 · 打回</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="id">昌九 · 7C</div>
+                    <div class="kind">COACH</div>
+                    <div class="conf"><span class="bar"><i style="width: 68%;"></i></span><span class="p">0.68</span></div>
+                    <span class="state review">复核中</span>
+                    <span class="act">通过 · 打回</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">演出票</div>
+                    <div class="id">寻梦滕王阁</div>
+                    <div class="kind">SHOW</div>
+                    <div class="conf"><span class="bar"><i style="width: 55%;"></i></span><span class="p">0.55</span></div>
+                    <span class="state deny">已拦截</span>
+                    <span class="act">加入黑名单</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">餐饮票</div>
+                    <div class="id">洪都大拇指</div>
+                    <div class="kind">RECEIPT</div>
+                    <div class="conf"><span class="bar"><i style="width: 88%;"></i></span><span class="p">0.88</span></div>
+                    <span class="state review">复核中</span>
+                    <span class="act">通过 · 打回</span>
+                  </div>
+                  <div class="queue-row" style="font-size: 12px;">
+                    <div class="thumb">高铁票</div>
+                    <div class="id">G1367 · 05F</div>
+                    <div class="kind">HSR TRAIN</div>
+                    <div class="conf"><span class="bar"><i style="width: 41%;"></i></span><span class="p">0.41</span></div>
+                    <span class="state deny">已拦截</span>
+                    <span class="act">加入黑名单</span>
+                  </div>
+                </div>
+
+                <div class="stack" style="gap: 20px;">
+                  <div class="rules">
+                    <div class="h">
+                      <div class="t">识别阈值 · 实时调参</div>
+                      <span class="pill">已启用</span>
+                    </div>
+                    <div class="row-r">
+                      <span class="l">自动通过 ≥</span>
+                      <span class="v on">0.90</span>
+                    </div>
+                    <div class="slider"><div class="fill" style="width: 78%;"></div><div class="knob" style="left: 78%;"></div></div>
+
+                    <div class="row-r">
+                      <span class="l">人工复核 ≥</span>
+                      <span class="v">0.60</span>
+                    </div>
+                    <div class="slider"><div class="fill" style="width: 40%;"></div><div class="knob" style="left: 40%;"></div></div>
+
+                    <div class="row-r">
+                      <span class="l">EXIF 时空校验</span>
+                      <span class="v on">开启</span>
+                    </div>
+                    <div class="row-r">
+                      <span class="l">图像 hash 去重</span>
+                      <span class="v on">开启</span>
+                    </div>
+                    <div class="row-r">
+                      <span class="l">P 图痕迹检测(β)</span>
+                      <span class="v on">开启</span>
+                    </div>
+                    <div class="row-r">
+                      <span class="l">重复票号黑名单</span>
+                      <span class="v">142 条</span>
+                    </div>
+                  </div>
+
+                  <div class="rules">
+                    <div class="h">
+                      <div class="t">今日投放剩余</div>
+                      <span class="meta">9:00 放号</span>
+                    </div>
+                    <div class="pool-row" style="grid-template-columns: 130px 1fr 46px 44px;">
+                      <span>免费奶茶</span><span class="bar"><i style="width: 62%;"></i></span><span class="val">62</span><span class="p">/100</span>
+                    </div>
+                    <div class="pool-row" style="grid-template-columns: 130px 1fr 46px 44px;">
+                      <span>免费烤肠</span><span class="bar"><i style="width: 41%;"></i></span><span class="val">41</span><span class="p">/100</span>
+                    </div>
+                    <div class="pool-row" style="grid-template-columns: 130px 1fr 46px 44px;">
+                      <span>奶茶 8 折</span><span class="bar"><i style="width: 89%;"></i></span><span class="val">178</span><span class="p">/200</span>
+                    </div>
+                    <div class="pool-row" style="grid-template-columns: 130px 1fr 46px 44px;">
+                      <span>亚朵抵扣</span><span class="bar"><i style="width: 89%;"></i></span><span class="val">89</span><span class="p">/100</span>
+                    </div>
+                    <div class="pool-row" style="grid-template-columns: 130px 1fr 46px 44px;">
+                      <span>怪石岭夜游</span><span class="bar"><i style="width: 0%;"></i></span><span class="val">0</span><span class="p">/150</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────── 6. ADMIN · dashboard ─────────────────── -->
+    <section class="section" data-od-id="admin-dashboard">
+      <div class="container">
+        <div class="sec-head">
+          <div class="l">
+            <span class="eyebrow">管理后台 · 数据总览</span>
+            <h2 class="h2">100 天进度 · 券池余量 · 玩法转化。</h2>
+            <p class="lead" style="margin-top: 14px;">从"活动可监测、可量化、可复盘、可迭代"出发,一屏看清七大权益池剩余量、六大玩法漏斗与外地游客来源省份分布。</p>
+          </div>
+          <div class="r">SNAPSHOT · Day 038</div>
+        </div>
+
+        <div class="kpi-row" style="margin-bottom: 24px;">
+          <div class="kpi"><div class="l">Total Upload · 总上传票根</div><div class="n num">312,481</div><div class="d">↑ 4,120 昨日</div></div>
+          <div class="kpi"><div class="l">Issued · 已发券</div><div class="n num">28,406</div><div class="d">↑ 622 昨日</div></div>
+          <div class="kpi"><div class="l">Redeemed · 已核销</div><div class="n num">19,732<span class="u">张</span></div><div class="d">核销率 69.5%</div></div>
+          <div class="kpi"><div class="l">Ranked Users · 榜单入围</div><div class="n num">1,204<span class="u">人</span></div><div class="d">10.08 结榜</div></div>
+        </div>
+
+        <div class="grid-2" style="gap: 24px;">
+          <div class="pool">
+            <div class="row-between"><h4>七大权益池剩余量</h4><span class="meta">100 天总量池</span></div>
+            <div class="pool-row"><span>免费奶茶券</span><span class="bar"><i style="width: 42%;"></i></span><span class="val num">4,214 / 10,000</span><span class="p">42%</span></div>
+            <div class="pool-row"><span>免费烤肠券</span><span class="bar"><i style="width: 38%;"></i></span><span class="val num">3,802 / 10,000</span><span class="p">38%</span></div>
+            <div class="pool-row"><span>奶茶 8 折券</span><span class="bar"><i style="width: 55%;"></i></span><span class="val num">10,996 / 20,000</span><span class="p">55%</span></div>
+            <div class="pool-row"><span>指定美食券</span><span class="bar"><i style="width: 34%;"></i></span><span class="val num">1,721 / 5,000</span><span class="p">34%</span></div>
+            <div class="pool-row"><span>亚朵酒店抵扣券</span><span class="bar"><i style="width: 46%;"></i></span><span class="val num">4,608 / 10,000</span><span class="p">46%</span></div>
+            <div class="pool-row"><span>美豪酒店 9 折券</span><span class="bar"><i style="width: 40%;"></i></span><span class="val num">3,204 / 8,000</span><span class="p">40%</span></div>
+            <div class="pool-row"><span>怪石岭夜游券</span><span class="bar"><i style="width: 61%;"></i></span><span class="val num">6,100 / 10,000</span><span class="p">61%</span></div>
+          </div>
+
+          <div class="stack" style="gap: 24px;">
+            <div class="pool">
+              <div class="row-between"><h4>玩法转化漏斗</h4><span class="meta">最近 7 天</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>票根上传</span><span class="bar"><i style="width: 100%;"></i></span><span class="val num">18,204</span><span class="p">100%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>识别通过</span><span class="bar"><i style="width: 94%;"></i></span><span class="val num">17,110</span><span class="p">94%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>抢券 / 盲盒</span><span class="bar"><i style="width: 71%;"></i></span><span class="val num">12,924</span><span class="p">71%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>到店核销</span><span class="bar"><i style="width: 49%;"></i></span><span class="val num">8,918</span><span class="p">49%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>复访(≥2 次)</span><span class="bar"><i style="width: 22%;"></i></span><span class="val num">4,006</span><span class="p">22%</span></div>
+            </div>
+
+            <div class="pool">
+              <div class="row-between"><h4>外地游客来源 TOP 5</h4><span class="meta">按上传 IP + 交通票起点</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>浙江 · 杭州</span><span class="bar"><i style="width: 100%;"></i></span><span class="val num">3,821</span><span class="p">21%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>广东 · 广州</span><span class="bar"><i style="width: 88%;"></i></span><span class="val num">3,364</span><span class="p">18%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>上海</span><span class="bar"><i style="width: 74%;"></i></span><span class="val num">2,822</span><span class="p">15%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>湖北 · 武汉</span><span class="bar"><i style="width: 58%;"></i></span><span class="val num">2,214</span><span class="p">12%</span></div>
+              <div class="pool-row" style="grid-template-columns: 130px 1fr 90px 60px;"><span>福建 · 厦门</span><span class="bar"><i style="width: 41%;"></i></span><span class="val num">1,566</span><span class="p">9%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ─────────────────── 7. RISK & INTEGRATIONS ─────────────────── -->
+    <section class="section" id="risk" data-od-id="risk">
+      <div class="container">
+        <div class="grid-2" style="gap: var(--gap-2xl); align-items: start;">
+          <div>
+            <span class="eyebrow">技术风险 · 应对</span>
+            <h2 class="h2">三个风险点,已写进产品里。</h2>
+            <p class="lead" style="margin-top: 14px;">这些不是白皮书条款,而是原型上可以点到的实际界面——AI 置信度可见、地理围栏替代照片、短视频进人工评审队列。</p>
+
+            <div class="log" style="margin-top: 40px;">
+              <div class="log-row">
+                <span class="k">Risk 01</span>
+                <div>
+                  <h3>智能体准确识别票根</h3>
+                  <p>多模型集成给出置信度,阈值双档拦截+人工兜底,拦截原因写入账本,历史黑名单可回滚。</p>
+                </div>
+                <div class="r"><div class="st">见「智能核验中心」</div></div>
+              </div>
+              <div class="log-row">
+                <span class="k">Risk 02</span>
+                <div>
+                  <h3>打卡照片可 P 图</h3>
+                  <p>改用小程序内 <span class="num">wx.getLocation</span> + 景区多边形围栏, 进入即计数, 从源头切断 P 图路径。</p>
+                </div>
+                <div class="r"><div class="st">见「打卡任务赛」</div></div>
+              </div>
+              <div class="log-row">
+                <span class="k">Risk 03</span>
+                <div>
+                  <h3>短视频真伪难判</h3>
+                  <p>话题、账号、发布时间三重校验后进人工评审队列, 月度榜单快照结算, 打回原因返给创作者。</p>
+                </div>
+                <div class="r"><div class="st">见「文旅推荐官」</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <span class="eyebrow">中间平台对接</span>
+            <h2 class="h2">四条对接管道 · 健康在线。</h2>
+            <p class="lead" style="margin-top: 14px;">白名单 IP + 配额同步,后台可看每条管道的连通状态与今日剩余配额,任何一条降级都会在总览页告警。</p>
+
+            <div class="card" style="margin-top: 32px; padding: 8px 22px;">
+              <div class="prov-list">
+                <div class="prov">
+                  <span class="st"></span>
+                  <div class="body">
+                    <div class="n">A 级景区门票 8.1 折</div>
+                    <div class="d">对接一码游江西 / 各景区票务系统,券码→校验→回执。</div>
+                  </div>
+                  <div class="quota">配额 6,182 / 10,000</div>
+                </div>
+                <div class="prov">
+                  <span class="st"></span>
+                  <div class="body">
+                    <div class="n">南昌地铁乘车券</div>
+                    <div class="d">对接南昌地铁 App / 一卡通,生成核销码,单日限额发放。</div>
+                  </div>
+                  <div class="quota">配额 4,240 / 10,000</div>
+                </div>
+                <div class="prov">
+                  <span class="st warn"></span>
+                  <div class="body">
+                    <div class="n">景区滴滴 5 折券</div>
+                    <div class="d">对接滴滴出行政企合作,券包发放 API,司机侧需感知配置。</div>
+                  </div>
+                  <div class="quota">配额 8,110 / 10,000</div>
+                </div>
+                <div class="prov">
+                  <span class="st"></span>
+                  <div class="body">
+                    <div class="n">热门电影票</div>
+                    <div class="d">对接淘票票 / 猫眼,券码人工放号,200 张限量。</div>
+                  </div>
+                  <div class="quota">已放 74 / 200</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────── 8. CTA ─────────────────── -->
+    <section class="section" data-od-id="cta" style="text-align: center;">
+      <div class="container" style="max-width: 620px;">
+        <span class="eyebrow" style="justify-content: center;">DAY 038 / 100 · 仍在进行</span>
+        <h2 class="h2" style="margin-bottom: 16px;">一张票根一座城,<br/>把 100 天走成一年。</h2>
+        <p class="lead" style="margin: 0 auto 32px;">积分不清零,活动结束后自动衔接下一季文旅消费季——用户留下的每一分,都在为南昌下一次到访蓄力。</p>
+        <button class="btn btn-primary">查看完整投放清单</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pagefoot" data-od-id="footer">
+    <div class="container row-between">
+      <span>© 2025 南昌市文旅产业发展有限公司 · 大江网 联合运营</span>
+      <span class="meta">南昌票根经济数字化平台 · contact@ncwl.gov.cn · 版本 v0.1 高保真原型</span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,54 @@
+replicaCount: 2
+
+image:
+  repository: ticket-economy/api-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.ticket-economy.example.com
+  tls: false
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+env:
+  DB_MODE: mysql-sql
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: ticket_economy
+  REDIS_ENABLED: "true"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  QUEUE_MODE: memory
+  REVIEW_MODE: async
+  AI_PROVIDER: mock
+  AI_MOCK_MODE: auto_approve
+  WECHAT_MODE: mock
+  MINIO_ENABLED: "true"
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_BUCKET: ticket-economy
+  CORS_ORIGINS: "https://admin.example.com"
+  TRUST_PROXY: "true"
+
+# Existing Secret name (create via ExternalSecrets / SealedSecrets)
+existingSecret: api-server-secret
+
+serviceMonitor:
+  enabled: false
+  interval: 30s

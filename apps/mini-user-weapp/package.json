@@ -1,0 +1,41 @@
+{
+  "name": "mini-user-weapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "文旅消费券 · 消费者微信小程序（Taro 3 + Vue3 脚手架）",
+  "templateInfo": {
+    "name": "default",
+    "typescript": true,
+    "css": "None"
+  },
+  "scripts": {
+    "build:weapp": "taro build --type weapp",
+    "dev:weapp": "npm run build:weapp -- --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 4.1",
+    "ios >= 8"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.26.0",
+    "@tarojs/components": "3.6.34",
+    "@tarojs/helper": "3.6.34",
+    "@tarojs/plugin-framework-vue3": "3.6.34",
+    "@tarojs/plugin-platform-weapp": "3.6.34",
+    "@tarojs/runtime": "3.6.34",
+    "@tarojs/shared": "3.6.34",
+    "@tarojs/taro": "3.6.34",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@tarojs/cli": "3.6.34",
+    "@tarojs/vite-runner": "3.6.34",
+    "@tarojs/webpack5-runner": "3.6.34",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.7.3",
+    "vite": "^4.5.5"
+  }
+}

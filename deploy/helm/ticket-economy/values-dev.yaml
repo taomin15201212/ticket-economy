@@ -1,0 +1,30 @@
+# 开发环境
+replicaCount: 1
+
+image:
+  tag: dev
+
+ingress:
+  enabled: false
+
+env:
+  DB_MODE: memory
+  REDIS_ENABLED: "false"
+  QUEUE_MODE: memory
+  REVIEW_MODE: async
+  AI_MOCK_MODE: auto_approve
+  WECHAT_MODE: mock
+  MINIO_ENABLED: "false"
+  CORS_ORIGINS: "*"
+  TRUST_PROXY: "false"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+serviceMonitor:
+  enabled: false

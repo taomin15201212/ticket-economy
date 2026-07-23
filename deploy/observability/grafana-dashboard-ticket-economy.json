@@ -1,0 +1,100 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "HTTP QPS",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(te_http_requests_total[1m]))",
+          "legendFormat": "qps"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "HTTP 5xx rate",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(te_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(te_http_requests_total[5m]))",
+          "legendFormat": "5xx"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Request duration p95",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(te_http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tickets submitted / approved",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(te_tickets_submitted_total[5m]))",
+          "legendFormat": "submitted"
+        },
+        {
+          "expr": "sum(rate(te_tickets_approved_total[5m]))",
+          "legendFormat": "approved"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Blindbox / redeem / checkin",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(te_blindbox_opened_total[5m])) by (result)",
+          "legendFormat": "box {{result}}"
+        },
+        {
+          "expr": "sum(rate(te_coupons_redeemed_total[5m]))",
+          "legendFormat": "redeem"
+        },
+        {
+          "expr": "sum(rate(te_checkins_total[5m])) by (status)",
+          "legendFormat": "checkin {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Process CPU / memory",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(te_process_cpu_user_seconds_total[5m])",
+          "legendFormat": "cpu user"
+        },
+        {
+          "expr": "te_process_resident_memory_bytes",
+          "legendFormat": "rss"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ticket-economy", "api"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "Ticket Economy API",
+  "uid": "ticket-economy-api",
+  "version": 1
+}

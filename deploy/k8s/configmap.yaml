@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-server-config
+  namespace: ticket-economy
+data:
+  PORT: "3000"
+  DB_MODE: "mysql"
+  MYSQL_HOST: "mysql"
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "ticket_economy"
+  REDIS_ENABLED: "true"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  QUEUE_MODE: "rabbitmq"
+  RABBITMQ_URL: "amqp://te:te_pass@rabbitmq:5672"
+  REVIEW_MODE: "async"
+  AI_PROVIDER: "mock"
+  AI_MOCK_MODE: "auto_approve"
+  WECHAT_MODE: "mock"
+  MINIO_ENABLED: "true"
+  MINIO_ENDPOINT: "minio"
+  MINIO_PORT: "9000"
+  MINIO_BUCKET: "ticket-economy"
+  MINIO_USE_SSL: "false"
+  # CORS: comma-separated origins, or * for open (not for prod)
+  CORS_ORIGINS: "https://admin.example.com,https://servicewechat.com"
+  TRUST_PROXY: "true"

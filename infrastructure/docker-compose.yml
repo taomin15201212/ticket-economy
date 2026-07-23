@@ -1,0 +1,108 @@
+# 文旅消费券平台 · 本地基础设施
+# 用法：在 infrastructure/ 目录执行
+#   docker compose up -d
+#   docker compose logs -f mysql
+
+name: ticket-economy
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: te-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ticket_economy
+      MYSQL_USER: te
+      MYSQL_PASSWORD: te_pass
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - te_mysql_data:/var/lib/mysql
+      - ../sql:/sql:ro
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    container_name: te-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - te_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: te-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: te
+      RABBITMQ_DEFAULT_PASS: te_pass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - te_rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    container_name: te-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: te_minio
+      MINIO_ROOT_PASSWORD: te_minio_pass
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - te_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # Optional: OCR / AI / expire workers (needs rabbitmq + api-server on host or network)
+  # Build: docker compose build workers
+  # workers:
+  #   build: ../services/workers
+  #   container_name: te-workers
+  #   restart: unless-stopped
+  #   environment:
+  #     PORT: 3001
+  #     RABBITMQ_URL: amqp://te:te_pass@rabbitmq:5672
+  #     API_BASE_URL: http://host.docker.internal:3000
+  #     WORKER_SECRET: te-worker-dev-secret
+  #     EXPIRE_SCAN_INTERVAL_MS: 60000
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+
+volumes:
+  te_mysql_data:
+  te_redis_data:
+  te_rabbitmq_data:
+  te_minio_data:

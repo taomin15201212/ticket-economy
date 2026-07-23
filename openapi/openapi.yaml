@@ -1,0 +1,853 @@
+openapi: 3.0.3
+info:
+  title: 文旅消费券积分平台 API
+  version: 1.0.0
+  description: |
+    消费者端、商户端、管理端统一 API 设计（MVP）。
+    统一响应：`{ code, message, traceId, data }`。
+servers:
+  - url: https://api.example.com
+    description: production
+  - url: http://localhost:3000
+    description: local
+tags:
+  - name: Auth
+  - name: User
+  - name: Ticket
+  - name: AI
+  - name: BlindBox
+  - name: Coupon
+  - name: Point
+  - name: Checkin
+  - name: Merchant
+  - name: Admin
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: 微信登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                deviceId:
+                  type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: 退出登录
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: 刷新 token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+
+  /api/user/profile:
+    get:
+      tags: [User]
+      summary: 获取用户资料
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+    put:
+      tags: [User]
+      summary: 更新用户资料
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                avatar:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /api/user/points:
+    get:
+      tags: [User]
+      summary: 当前积分与等级
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/user/coupons:
+    get:
+      tags: [User]
+      summary: 我的消费券列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: integer
+            description: 1未使用 3已使用 4已过期
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ok
+
+  /api/ticket/upload:
+    post:
+      tags: [Ticket]
+      summary: 上传票据图片
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                ticketType:
+                  type: string
+                  enum: [dining, scenic, metro, movie, didi]
+      responses:
+        '200':
+          description: 返回 ticketId 与初始状态
+  /api/ticket/submit:
+    post:
+      tags: [Ticket]
+      summary: 确认提交票据进入审核
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+  /api/ticket/list:
+    get:
+      tags: [Ticket]
+      summary: 我的票据列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ok
+  /api/ticket/detail/{id}:
+    get:
+      tags: [Ticket]
+      summary: 票据详情
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ok
+  /api/ticket/cancel:
+    post:
+      tags: [Ticket]
+      summary: 取消未进入终态的票据
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+
+  /api/ai/ocr:
+    post:
+      tags: [AI]
+      summary: OCR 识别（内部/管理调用）
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+  /api/ai/review:
+    post:
+      tags: [AI]
+      summary: AI 审核
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+  /api/ai/risk-score:
+    post:
+      tags: [AI]
+      summary: 风险评分
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+
+  /api/blindbox/open:
+    post:
+      tags: [BlindBox]
+      summary: 打开盲盒
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+                blindBoxId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 返回奖品与券信息
+  /api/blindbox/history:
+    get:
+      tags: [BlindBox]
+      summary: 开奖历史
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ok
+  /api/blindbox/config:
+    get:
+      tags: [BlindBox]
+      summary: 当前盲盒配置（不含敏感概率细节时可裁剪）
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+
+  /api/coupon/list:
+    get:
+      tags: [Coupon]
+      summary: 券包列表（同 /api/user/coupons，保留业务语义别名）
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/coupon/detail/{id}:
+    get:
+      tags: [Coupon]
+      summary: 券详情（含核销码）
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: ok
+  /api/coupon/lock:
+    post:
+      tags: [Coupon]
+      summary: 核销前锁定
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [couponCode]
+              properties:
+                couponCode:
+                  type: string
+                merchantId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+  /api/coupon/use:
+    post:
+      tags: [Coupon]
+      summary: 核销消费券
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [couponCode, merchantId]
+              properties:
+                couponCode:
+                  type: string
+                merchantId:
+                  type: integer
+                  format: int64
+                verifyType:
+                  type: string
+                  enum: [scan, manual, pos]
+                requestId:
+                  type: string
+      responses:
+        '200':
+          description: ok
+
+  /api/point/list:
+    get:
+      tags: [Point]
+      summary: 积分流水
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ok
+  /api/point/goods:
+    get:
+      tags: [Point]
+      summary: 积分商城商品
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/point/exchange:
+    post:
+      tags: [Point]
+      summary: 积分兑换
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [goodsId]
+              properties:
+                goodsId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: ok
+  /api/point/rank:
+    get:
+      tags: [Point]
+      summary: 积分排行榜
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: ok
+
+  /api/checkin:
+    post:
+      tags: [Checkin]
+      summary: 打卡
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [longitude, latitude]
+              properties:
+                locationId:
+                  type: integer
+                  format: int64
+                merchantId:
+                  type: integer
+                  format: int64
+                longitude:
+                  type: number
+                latitude:
+                  type: number
+                photo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: ok
+  /api/checkin/history:
+    get:
+      tags: [Checkin]
+      summary: 打卡历史
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/checkin/task:
+    get:
+      tags: [Checkin]
+      summary: 打卡任务列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+
+  /api/merchant/login:
+    post:
+      tags: [Merchant]
+      summary: 商户登录
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /api/merchant/register:
+    post:
+      tags: [Merchant]
+      summary: 商户/门店注册
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [merchantName, storeName]
+              properties:
+                merchantName:
+                  type: string
+                storeName:
+                  type: string
+                address:
+                  type: string
+                longitude:
+                  type: number
+                latitude:
+                  type: number
+                contact:
+                  type: string
+                phone:
+                  type: string
+                businessLicense:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /api/merchant/verify:
+    post:
+      tags: [Merchant]
+      summary: 商户验券核销
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [couponCode]
+              properties:
+                couponCode:
+                  type: string
+                verifyType:
+                  type: string
+                  enum: [scan, manual, pos]
+                requestId:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /api/merchant/store:
+    get:
+      tags: [Merchant]
+      summary: 当前门店信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /api/merchant/report:
+    get:
+      tags: [Merchant]
+      summary: 门店核销统计
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+  /api/merchant/use-records:
+    get:
+      tags: [Merchant]
+      summary: 核销记录
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ok
+
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: 运营仪表盘
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /admin/tickets:
+    get:
+      tags: [Admin]
+      summary: 票据审核列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: ok
+  /admin/tickets/pass:
+    post:
+      tags: [Admin]
+      summary: 人工通过
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /admin/tickets/reject:
+    post:
+      tags: [Admin]
+      summary: 人工拒绝
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketId, reason]
+              properties:
+                ticketId:
+                  type: integer
+                  format: int64
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: ok
+  /admin/coupon/create:
+    post:
+      tags: [Admin]
+      summary: 创建消费券模板
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponTemplateCreate'
+      responses:
+        '200':
+          description: ok
+  /admin/blindbox/config:
+    put:
+      tags: [Admin]
+      summary: 更新盲盒概率与库存
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blindBoxId:
+                  type: integer
+                  format: int64
+                rewards:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      rewardId:
+                        type: integer
+                        format: int64
+                      weight:
+                        type: integer
+                      remainStock:
+                        type: integer
+      responses:
+        '200':
+          description: ok
+  /admin/point/rule:
+    put:
+      tags: [Admin]
+      summary: 更新积分规则
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ok
+  /admin/statistics:
+    get:
+      tags: [Admin]
+      summary: 发券/核销/积分统计
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [coupon_issue, coupon_use, point_rank]
+      responses:
+        '200':
+          description: ok
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        traceId:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+    PageResult:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        list:
+          type: array
+          items:
+            type: object
+    CouponTemplateCreate:
+      type: object
+      required: [couponName, couponType, totalCount]
+      properties:
+        couponName:
+          type: string
+        couponType:
+          type: string
+        providerType:
+          type: string
+        amount:
+          type: number
+        discountDesc:
+          type: string
+        totalCount:
+          type: integer
+        validDays:
+          type: integer
+        rules:
+          type: object
+    ErrorCodes:
+      type: object
+      description: |
+        0 成功
+        10001 未登录
+        10002 参数错误
+        20001 票据重复
+        20002 AI审核失败
+        30001 库存不足
+        40001 消费券已使用
+        40002 消费券已过期
